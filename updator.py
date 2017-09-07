@@ -16,7 +16,6 @@ except ImportError:
 
 import config
 
-ASADMIN = 'asadmin'
 SEPARATOR = '# -------------------- Modified -------------------- #'
 INITIAL_HOSTS = '''# Copyright (c) 1993-2009 Microsoft Corp.
 #
@@ -50,6 +49,10 @@ def get_hosts_dir(system):
         return '/etc/'
     raise Exception('System type error: unknown system "%s"' %system)
 
+# 文件路径，记录了上一次下载的 hosts 的 md5 校验码
+def get_md5_file():
+    return os.path.join(os.path.dirname(__file__), 'last-md5.txt')
+
 # 判断 hosts 是否存在
 def hosts_exists(hosts_dir):
     hosts_file = os.path.join(hosts_dir, 'hosts')
@@ -70,19 +73,18 @@ def download_hosts(url):
     print('Hosts download success!')
     return data
 
-# 通过 md5 校验下载的 hosts 文件版本，避免重复更新
-# 返回 False 表示不需要更新，反之代表需要更新
-def check_version(md5_code):
-    last_md5_file = os.path.join(os.path.dirname(__file__), 'last-md5.txt')
+# 获取上次更新时记录的 md5 码
+def get_last_md5(md5_file):
     last_md5 = ''
-    if os.path.isfile(last_md5_file):
-        with open(last_md5_file, 'r') as f:
+    if os.path.isfile(md5_file):
+        with open(md5_file, 'r') as f:
             last_md5 = f.read().strip()
-    if md5_code == last_md5:
-        return False
-    with open(last_md5_file, 'w') as f:
-        f.write(md5_code)
-    return True
+    return last_md5
+
+# hosts 更新成功后，更新 md5 校验码
+def update_md5(md5_file, md5):
+    with open(md5_file, 'w') as f:
+        f.write(md5)
 
 # 备份 hosts 文件
 def backup_hosts(hosts_dir):
@@ -111,7 +113,7 @@ def truncate_hosts(hosts_dir):
 def update_hosts(hosts_dir, data):
     hosts_file = os.path.join(hosts_dir, 'hosts')
     with open(hosts_file, 'a') as f:
-        f.write(data)
+        f.write(data.decode('utf8'))
     print('Hosts update success!')
 
 # hosts 更新之后，还需要刷新 DNS 或重启网络适配器等后续工作
@@ -131,19 +133,21 @@ def after_update(system):
 def main(url):
     system = platform.system()
     hosts_dir = get_hosts_dir(system)
+    md5_file = get_md5_file()
     if not hosts_exists(hosts_dir):
         init_hosts(hosts_dir)
     data = download_hosts(url)
-    md5_code = hashlib.md5(data).hexdigest()
-    need_update = check_version(md5_code)
-    if not need_update:
-        print('Hosts already up-to-date\nQuit')
+    md5 = hashlib.md5(data).hexdigest()
+    last_md5 = get_last_md5(md5_file)
+    if md5 == last_md5:
+        print('Hosts already up-to-date!\nQuit')
         return
     backup_hosts(hosts_dir)
     truncate_hosts(hosts_dir)
     update_hosts(hosts_dir, data)
     after_update(system)
-    print('\n*** All success! Try to cross the wall! ***\n')
+    update_md5(md5_file, md5)
+    print('\n*** All success! Try to google something~ ***\n')
 
 
 if __name__ == '__main__':
@@ -151,8 +155,7 @@ if __name__ == '__main__':
     try:
         main(url)
     except Exception as e:
-        print('An error has occured:')
+        print('An error occured:')
         print(e)
+    finally:
         os.system('pause')
-
-    os.system('pause')
