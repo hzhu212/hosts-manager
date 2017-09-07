@@ -4,7 +4,14 @@
 
 ### 使用方法
 
-> Windows 平台下测试通过。原则上支持 Linux 与 Mac 平台，但并未测试。
+> 支持 Windows、Linux 和 MacOSX 平台。但并未在 Linux 和 MacOSX 平台进行测试。
+
+#### 依赖环境：
+
+1. python 环境（python2.x 或 python3.x 均可）
+2. Windows 下需要安装 python 第三方库 `pypiwin32`，安装命令为 `pip install pypiwin32`
+
+#### 使用方法
 
 1. 下载此项目到本地。`git clone` 或 直接下载 zip 压缩包均可；
 2. 为了使用方便，将项目目录 `hosts-manager` 添加到 `PATH` 环境变量；
@@ -37,7 +44,14 @@
 
 ### Usage
 
-> OK for Windows platform. Linux and Mac are supported but not tested.
+> Supporting Windows, Linux and MacOSX platform, but not tested on Linux and MacOSX.
+
+#### Required environment
+
+1. Python(both 2.x and 3.x are fine)
+2. On Windows platform, need third party library `pypiwin32`, use command `pip install pypiwin32` for installing.
+
+#### How to use
 
 1. Download this project to your PC. Use `git clone` or `download zip`.
 2. In order to open hman everywhere, Add the project folder `hosts-manager` to environment variable `PATH`.
