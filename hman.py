@@ -25,8 +25,8 @@ Commands:
 
 def update_config(update_dict):
     import config
-    keys = [k for k in dir(config) if '__' not in k]
-    values = [eval('config.'+k) for k in keys]
+    keys = [k for k in dir(config) if not k.startswith('__')]
+    values = [config.__dict__.get(k, None) for k in keys]
     config_dict = dict(zip(keys, values))
     config_dict.update(update_dict)
     config_file = os.path.join(os.path.dirname(__file__), 'config.py')
@@ -68,6 +68,7 @@ if __name__ == '__main__':
         new_name, new_url = sys.argv[2:4]
         sources[new_name] = new_url
         update_config({ 'sources': sources })
+        print('Added new source: %s - %s' %(new_name, new_url))
 
     elif command in ('remove', 'rm'):
         import config
@@ -82,6 +83,7 @@ if __name__ == '__main__':
             print('Error: invalid hosts source name: %s' %name)
             sys.exit(1)
         update_config({ 'sources': sources })
+        print('Deleted source: %s' %(name))
 
     elif command == 'use':
         if len(sys.argv) < 3:
@@ -89,7 +91,7 @@ if __name__ == '__main__':
             sys.exit(1)
         to_use = sys.argv[2]
         update_config({ 'current': to_use })
-        print('Current source changed to %s' %to_use)
+        print('switched current source to "%s"' %to_use)
 
     elif command == 'rename':
         if len(sys.argv) < 4:
@@ -105,9 +107,10 @@ if __name__ == '__main__':
             if old_name == current:
                 current = new_name
         update_config({ 'sources': sources, 'current': current })
+        print('renamed "%s" to "%s"' %(old_name, new_name))
 
     elif command in ('help', '-h', '/?', '--help', None):
         print(help_message)
     else:
-        print('Command error.\n')
+        print('Unknown command: "%s"\n' %(' '.join(sys.argv)))
         print(help_message)
