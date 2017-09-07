@@ -1,4 +1,3 @@
-#!python2
 # -*- coding: utf-8 -*-
 
 # hosts-manager CLI
@@ -6,7 +5,6 @@
 import os
 import sys
 import platform
-import win32com.shell.shell as shell
 import json
 
 help_message = '''
@@ -48,6 +46,7 @@ if __name__ == '__main__':
 
         # 以管理员权限运行更新脚本
         if system == 'Windows':
+            import win32com.shell.shell as shell
             shell.ShellExecuteEx(lpVerb='runas', lpFile=sys.executable, lpParameters=script, nShow=5)
         else:
             os.system('sudo %s' %script)

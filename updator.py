@@ -1,12 +1,18 @@
-#!python2
 # -*- coding: utf-8 -*-
 
 import os
 import time
 import platform
-import urllib2
 import hashlib
 import shutil
+
+# import urllib
+try:
+    # For Python 3
+    from urllib.request import urlopen
+except ImportError:
+    # Fall back to Python 2
+    from urllib2 import urlopen
 
 import config
 
@@ -60,7 +66,7 @@ def init_hosts(hosts_dir):
 # 从 url 处下载 hosts 文件
 def download_hosts(url):
     print('Downloading hosts...')
-    data = urllib2.urlopen(url).read()
+    data = urlopen(url).read()
     print('Hosts download success!')
     return data
 
@@ -146,7 +152,7 @@ if __name__ == '__main__':
         main(url)
     except Exception as e:
         print('An error has occured:')
-        print e
+        print(e)
         os.system('pause')
 
     os.system('pause')
