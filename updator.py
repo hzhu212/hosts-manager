@@ -113,7 +113,11 @@ def truncate_hosts(hosts_dir):
 def update_hosts(hosts_dir, data):
     hosts_file = os.path.join(hosts_dir, 'hosts')
     with open(hosts_file, 'a') as f:
-        f.write(data.decode('utf8'))
+        try:
+            f.write(data)
+        except TypeError:
+            # python 3
+            f.write(data.decode('utf8', errors='ignore'))
     print('Hosts update success!')
 
 # hosts 更新之后，还需要刷新 DNS 或重启网络适配器等后续工作
