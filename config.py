@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-current = "wcm-ipv6"
+current = "sy618-fq"
 
 sources = [
     {
@@ -12,6 +12,16 @@ sources = [
         "name": "gg-m",
         "note": "",
         "url": "https://coding.net/u/scaffrey/p/hosts/git/raw/master/hosts-files/hosts"
+    },
+    {
+        "name": "sy618-fq",
+        "note": "",
+        "url": "https://raw.githubusercontent.com/sy618/hosts/master/FQ"
+    },
+    {
+        "name": "sy618-pc",
+        "note": "",
+        "url": "https://raw.githubusercontent.com/sy618/hosts/master/pc"
     },
     {
         "name": "lengers",
@@ -34,16 +44,6 @@ sources = [
         "url": "https://raw.githubusercontent.com/superliaoyong/hosts/master/hosts"
     },
     {
-        "name": "sy618-fq",
-        "note": "",
-        "url": "https://raw.githubusercontent.com/sy618/hosts/master/FQ"
-    },
-    {
-        "name": "sy618-pc",
-        "note": "",
-        "url": "https://raw.githubusercontent.com/sy618/hosts/master/pc"
-    },
-    {
         "name": "vokins-ad",
         "note": "",
         "url": "https://raw.githubusercontent.com/vokins/yhosts/master/hosts"
@@ -57,10 +57,5 @@ sources = [
         "name": "wcm-ipv6",
         "note": "",
         "url": "https://raw.githubusercontent.com/wangchunming/2017hosts/master/hosts-ipv6-pc"
-    },
-    {
-        "name": "t1",
-        "note": "",
-        "url": "test1"
     }
 ]
