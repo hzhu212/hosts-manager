@@ -10,6 +10,7 @@
 
 1. python 环境（python2.x 或 python3.x 均可）
 2. Windows 下需要安装 python 第三方库 `pypiwin32`，安装命令为 `pip install pypiwin32`
+3. `readline`(Linux) 或 `pyreadline`(Windows) 库，用于自动补全，非必需
 
 #### 使用方法
 

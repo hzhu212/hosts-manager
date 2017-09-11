@@ -14,6 +14,7 @@ Usage:
   hman <command> [<parameters>]
 
 Commands:
+  h:      \tShow this help message.
   add:    \tAdd a new source.
   help:   \tShow help message for a specified command.
   list:   \tList all the sources available. Source in use starts with "*".
@@ -25,15 +26,16 @@ Commands:
   rm:     \tAlias of `remove`.
   reorder:\tReorder a source.
   use:    \tUse specified source as system hosts.
-  others: \tShow this help message.
 '''
 
 
 class HostsManager(Cmd):
     """Hosts Manager CLI."""
+    prompt = '(hman)> '
+    intro = 'Welcome to hosts-manager CLI. Type "h" to get help.\n'
+
     def __init__(self):
         Cmd.__init__(self)
-        self.prompt = '(hman)>> '
         try:
             import config
         except ImportError:
@@ -69,8 +71,8 @@ class HostsManager(Cmd):
         return [src['name'] for src in self.sources]
 
 
-    def default(self, line):
-        Cmd.default(self, line)
+    def do_h(self, line):
+        """Get help message.\n"""
         print(help_message)
 
 
@@ -80,12 +82,25 @@ class HostsManager(Cmd):
         self._rewrite_config()
 
 
+    def complete_name(self, text, line, begidx, endidx):
+        print('\ntext, line, begidx, endidx: %s\n' %([text, line, begidx, endidx]))
+        all_names = self.get_all_names()
+        return [n for n in all_names if n.startswith(text)]
+
+
+    def complete_name_once(self, text, line, begidx, endidx):
+        if len((line + '_').split()) > 2:
+            return []
+        all_names = self.get_all_names()
+        return [n for n in all_names if n.startswith(text)]
+
+
     @p.parameter(name='extra', validator=p.Choice(['-a','--all']))
     @p.parameter_over()
     def do_list(self, is_detail):
         """List all the hosts sources. Symbol "*" indicates the one in use.
         Usage: `list` or `ls`.
-            Use addational parameter `-a` or `--all` to list detail information.\n"""
+        Use extra parameter `-a` or `--all` to list detail information.\n"""
         for index, src in enumerate(self.sources):
             lead = '*' if src['name'] == self.current else ' '
             if is_detail:
@@ -94,9 +109,6 @@ class HostsManager(Cmd):
             else:
                 print('{lead} {name}:\t{url}'.format(lead=lead, name=src['name'], url=src['url']))
         print('')
-
-
-    do_ls = do_list
 
 
     @p.parameter(name='name', required=True)
@@ -137,9 +149,6 @@ class HostsManager(Cmd):
             self.rmdir(d)
 
 
-    do_rm = do_remove
-
-
     @p.parameter(name='old_name', required=True, validator=(p.Choice, p.FromObj(get_all_names)))
     @p.parameter(name='new_name', required=True)
     @p.parameter_over()
@@ -153,9 +162,6 @@ class HostsManager(Cmd):
         if os.path.isdir(old_data_dir):
             os.rename(old_data_dir, new_data_dir)
         # print('Renamed "%s" to "%s"\n' %(old_name, new_name))
-
-
-    do_ren = do_rename
 
 
     @p.parameter(name='name', required=True, validator=(p.Choice, p.FromObj(get_all_names)))
@@ -223,14 +229,21 @@ class HostsManager(Cmd):
         # print('%ssed hosts from source %s\n' %('Pulled and u' if is_pull else 'U', name))
 
 
-    def preloop(self):
-        print(help_message)
-
-
     def do_exit(self, line):
         """Exit hosts-manager.\n"""
         self._rewrite_config()
         sys.exit(0)
+
+
+    do_ls = do_list
+    do_rm = do_remove
+    do_ren = do_rename
+
+    complete_remove = complete_rm = complete_name
+    complete_rename = complete_ren = complete_name_once
+    complete_reorder = complete_name_once
+    complete_pull = complete_name_once
+    complete_use = complete_name_once
 
 
 if __name__ == '__main__':

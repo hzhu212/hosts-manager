@@ -81,7 +81,7 @@ class HostsUpdator(object):
     @staticmethod
     def write_bytes(fobj, _bytes):
         try:
-            fobj.write(_bytes.decode('utf8', errors='ignore'))
+            fobj.write(_bytes)
         except TypeError:
             # python 3
             fobj.write(_bytes.decode('utf8', errors='ignore'))
@@ -97,7 +97,7 @@ class HostsUpdator(object):
     def init_hosts(self):
         logger.info('Hosts not exists, initializing ...')
         hosts_file = os.path.join(self.hosts_dir, 'hosts')
-        with open(hosts_file, 'w') as f:
+        with codecs.open(hosts_file, 'w', encoding='utf8') as f:
             f.write(INITIAL_HOSTS)
         logger.info('Success initializing hosts')
 
@@ -126,7 +126,8 @@ class HostsUpdator(object):
             return
         hosts_download = os.path.join(self.working_dir, 'hosts.txt')
         with codecs.open(hosts_download, 'w', encoding='utf8') as f:
-            self.write_bytes(f, data)
+            # self.write_bytes(f, data)
+            f.write(data)
         update_md5(md5_file, md5)
         logger.info('Success pulling hosts from source %s' %self.name)
 
@@ -144,7 +145,7 @@ class HostsUpdator(object):
     def get_user_hosts(self):
         hosts_file = os.path.join(self.hosts_dir, 'hosts')
         user_hosts = []
-        with open(hosts_file, 'r') as f:
+        with codecs.open(hosts_file, 'r', encoding='utf8') as f:
             line = f.readline()
             while line and not line.startswith(SEPARATOR):
                 user_hosts.append(line)
@@ -167,8 +168,9 @@ class HostsUpdator(object):
         user_hosts = self.get_user_hosts()
         with codecs.open(hosts_file, 'w', encoding='utf8') as f:
             f.writelines(user_hosts + [SEPARATOR, '\n'])
-            with open(hosts_download, 'r') as d:
-                self.write_bytes(f, d.read())
+            with codecs.open(hosts_download, 'r', encoding='utf8') as d:
+                # self.write_bytes(f, d.read())
+                f.write(d.read())
         self.after_use()
         logger.info('Success switching hosts to source %s' %self.name)
 
