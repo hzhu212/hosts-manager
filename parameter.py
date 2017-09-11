@@ -20,8 +20,14 @@ class Validator(object):
 
 class Choice(Validator):
     """Validator for choosing an option from a list"""
+    def __init__(self, base=None, _all=('*', '-a', '--all')):
+        Validator.__init__(self, base)
+        self.all = tuple([_all]) if type(_all)==str else tuple(_all)
+
     def validate(self, test):
-        return (test in self.base)
+        if test in self.all:
+            return True
+        return test in self.base
 
     def invalid_message(self, param_name, param_value=None):
         print('*** Parameter Error: parameter "%s" must in %s, but "%s" got.\n'

@@ -19,10 +19,10 @@ Commands:
   help:   \tShow help message for a specified command.
   list:   \tList all the sources available. Source in use starts with "*".
   ls:     \tAlias of `list`.
-  pull:   \tPull and store hosts from specified source.
+  pull:   \tPull and store hosts from remote.
   rename: \tRename a source.
   ren:    \tAlias of `rename`.
-  remove: \tRemove (an) existing source(s).
+  remove: \tRemove existing source(s).
   rm:     \tAlias of `remove`.
   reorder:\tReorder a source.
   use:    \tUse specified source as system hosts.
@@ -32,7 +32,7 @@ Commands:
 class HostsManager(Cmd):
     """Hosts Manager CLI."""
     prompt = '(hman)> '
-    intro = 'Welcome to hosts-manager CLI. Type "h" to get help.\n'
+    intro = 'Welcome to hosts-manager CLI. Type "h" to get general help. Type "help <command>" to get command help.\n'
 
     def __init__(self):
         Cmd.__init__(self)
@@ -83,7 +83,7 @@ class HostsManager(Cmd):
 
 
     def complete_name(self, text, line, begidx, endidx):
-        print('\ntext, line, begidx, endidx: %s\n' %([text, line, begidx, endidx]))
+        # print('\ntext, line, begidx, endidx: %s\n' %([text, line, begidx, endidx]))
         all_names = self.get_all_names()
         return [n for n in all_names if n.startswith(text)]
 
@@ -185,25 +185,20 @@ class HostsManager(Cmd):
         # print('Reordered "%s" to the %dth position\n' %(name, new_order+1))
 
 
-    @p.parameter(name='name', validator=(p.Choice, p.FromObj(get_all_names)))
-    @p.parameter(name='extra', validator=p.Choice(['-u', '--use']))
-    @p.parameter_over()
-    def do_pull(self, name, extra):
-        """Pull (specified or current) source from remote.
-        Usage: `pull [name [-u]]` or `pull [name [--use]]`
-            name: source name to pull from. Default as current source.
-            -u or --use: use the source after pull.
-        `pull name -u` is same as `use name -p`\n"""
-        if not name:
-            name = self.current
-        is_use = bool(extra)
-        to_pull = self._get_source_by_name(name)
-        updator = HostsUpdator(to_pull['name'], to_pull['url'])
-        updator.pull()
-        if is_use:
-            updator.use()
-            self.current = name
-        # print('Pulled%s hosts from source %s\n' %(' and used' if is_use else '', name))
+    @p.parameter_vary(name='name', validator=(p.Choice, p.FromObj(get_all_names)))
+    def do_pull(self, names):
+        """Pull source(s) from remote.
+        Usage: `pull [name1 [name2 [name3]]]...`
+        If `name1` not specified, then pull current source.
+        `pull *` will pull all sources.\n"""
+        if not names:
+            names = [self.current]
+        elif '*' in names:
+            names = self.get_all_names()
+        for name in names:
+            to_pull = self._get_source_by_name(name)
+            updator = HostsUpdator(to_pull['name'], to_pull['url'])
+            updator.pull()
 
 
     @p.parameter(name='name', required=True, validator=(p.Choice, p.FromObj(get_all_names)))
@@ -212,9 +207,8 @@ class HostsManager(Cmd):
     def do_use(self, name, extra):
         """Switch to specified source.
         Usage: `use name [-p]` or `use name [--pull]`.
-            name: source name to switch to.
-            -p or --pull: pull from the source before switch.
-        `use name -p` is same as `pull name -u`.\n"""
+            `name`: source name to switch to.
+            `-p` or `--pull`: pull from the source before switch.\n"""
         is_pull = bool(extra)
         if not is_pull:
             data_dir = os.path.join(self.app_root, 'data', name)
@@ -240,9 +234,9 @@ class HostsManager(Cmd):
     do_ren = do_rename
 
     complete_remove = complete_rm = complete_name
+    complete_pull = complete_name
     complete_rename = complete_ren = complete_name_once
     complete_reorder = complete_name_once
-    complete_pull = complete_name_once
     complete_use = complete_name_once
 
 

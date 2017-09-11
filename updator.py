@@ -46,7 +46,8 @@ INITIAL_HOSTS = '''# Copyright (c) 1993-2009 Microsoft Corp.
 logger = logging.getLogger('HostsUpdator')
 logger.setLevel(logging.INFO)
 hd = logging.StreamHandler()
-formatter = logging.Formatter('[%(asctime)s] %(name)s: %(levelname)s: %(message)s')
+# formatter = logging.Formatter('[%(asctime)s] %(name)s: %(levelname)s: %(message)s')
+formatter = logging.Formatter(fmt='[%(asctime)s]:%(levelname)s: %(message)s',datefmt='%Y-%m-%d %H:%M:%S')
 hd.setFormatter(formatter)
 logger.addHandler(hd)
 
@@ -66,7 +67,7 @@ class HostsUpdator(object):
             return os.path.join(os.environ['SystemRoot'], 'System32', 'drivers', 'etc')
         if self.system in ('Linux', 'Darwin'):
             return '/etc/'
-        raise Exception('System type error: unknown system "%s"' %self.system)
+        raise Exception('System type error: unknown system: %s' %self.system)
 
 
     # 获取当前源的数据目录
@@ -79,12 +80,16 @@ class HostsUpdator(object):
 
 
     @staticmethod
-    def write_bytes(fobj, _bytes):
+    def safe_write(fobj, data):
+        # python 3: "write" method requires str, not bytes
         try:
-            fobj.write(_bytes)
-        except TypeError:
-            # python 3
-            fobj.write(_bytes.decode('utf8', errors='ignore'))
+            fobj.write(data)
+        except (TypeError, UnicodeDecodeError) as e:
+            fobj.write(data.decode('utf8'))
+        except UnicodeDecodeError as e:
+            fobj.write(data.decode('gbk'))
+        except UnicodeDecodeError as e:
+            fobj.write(data.decode('utf8', errors='ignore'))
 
 
     # 判断 hosts 是否存在
@@ -116,20 +121,19 @@ class HostsUpdator(object):
             with open(md5_file, 'w') as f:
                 f.write(md5)
 
-        logger.info('Downloading hosts from %s: %s ...' %(self.name, self.url))
+        logger.info('Downloading hosts from source [%s]: %s ...' %(self.name, self.url))
         data = urlopen(self.url).read()
         md5 = hashlib.md5(data).hexdigest()
         md5_file = os.path.join(self.working_dir, 'md5.txt')
         last_md5 = get_last_md5(md5_file)
         if md5 == last_md5:
-            logger.info('Hosts is already up-to-date with source %s. Quit updating!' %self.name)
+            logger.info('Hosts is already up-to-date with source [%s]. Quit updating!' %self.name)
             return
         hosts_download = os.path.join(self.working_dir, 'hosts.txt')
         with codecs.open(hosts_download, 'w', encoding='utf8') as f:
-            # self.write_bytes(f, data)
-            f.write(data)
+            self.safe_write(f, data)
         update_md5(md5_file, md5)
-        logger.info('Success pulling hosts from source %s' %self.name)
+        logger.info('Success pulling hosts from source [%s]' %self.name)
 
 
     # 备份 hosts 文件
@@ -169,10 +173,9 @@ class HostsUpdator(object):
         with codecs.open(hosts_file, 'w', encoding='utf8') as f:
             f.writelines(user_hosts + [SEPARATOR, '\n'])
             with codecs.open(hosts_download, 'r', encoding='utf8') as d:
-                # self.write_bytes(f, d.read())
-                f.write(d.read())
+                self.safe_write(f, d.read())
         self.after_use()
-        logger.info('Success switching hosts to source %s' %self.name)
+        logger.info('Success switching hosts to source [%s]' %self.name)
 
 
     # hosts 更新之后，还需要刷新 DNS 或重启网络适配器等后续工作
