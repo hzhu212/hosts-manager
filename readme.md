@@ -40,6 +40,13 @@
 
 开启科学上网之旅吧~
 
+### TODO
+
+1. 命令行自动补全；
+2. 更友好的方式请求管理员权限；
+3. 使用装饰器重构 HostsManager 类中的参数判断
+4. 解决 Python2 中存在的编解码问题
+
 ## English document
 
 ### Usage

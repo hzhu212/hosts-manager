@@ -81,7 +81,7 @@ class HostsUpdator(object):
     @staticmethod
     def write_bytes(fobj, _bytes):
         try:
-            fobj.write(_bytes)
+            fobj.write(_bytes.decode('utf8', errors='ignore'))
         except TypeError:
             # python 3
             fobj.write(_bytes.decode('utf8', errors='ignore'))
@@ -165,7 +165,7 @@ class HostsUpdator(object):
         hosts_file = os.path.join(self.hosts_dir, 'hosts')
         hosts_download = os.path.join(self.working_dir, 'hosts.txt')
         user_hosts = self.get_user_hosts()
-        with open(hosts_file, 'w') as f:
+        with codecs.open(hosts_file, 'w', encoding='utf8') as f:
             f.writelines(user_hosts + [SEPARATOR, '\n'])
             with open(hosts_download, 'r') as d:
                 self.write_bytes(f, d.read())
