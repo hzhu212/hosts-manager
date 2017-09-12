@@ -1,0 +1,2 @@
+pypiwin32==220
+pyreadline==2.1
