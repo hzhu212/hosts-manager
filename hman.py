@@ -6,8 +6,8 @@ import json
 import shutil
 from cmd import Cmd
 
-import parameter as p
-from updator import HostsUpdator
+from util import parameter as p
+from util.updator import HostsUpdator
 
 help_message = '''
 Usage:
@@ -157,6 +157,8 @@ class HostsManager(Cmd):
         Usage: `rename old_name new_name`.\n"""
         all_names = self.get_all_names()
         self.sources[all_names.index(old_name)]['name'] = new_name
+        if old_name == self.current:
+            self.current = new_name
         old_data_dir = os.path.join(self.app_root, 'data', old_name)
         new_data_dir = os.path.join(self.app_root, 'data', new_name)
         if os.path.isdir(old_data_dir):
@@ -197,7 +199,7 @@ class HostsManager(Cmd):
             names = self.get_all_names()
         for name in names:
             to_pull = self._get_source_by_name(name)
-            updator = HostsUpdator(to_pull['name'], to_pull['url'])
+            updator = HostsUpdator(to_pull['name'], to_pull['url'], self.app_root)
             updator.pull()
 
 
@@ -215,7 +217,7 @@ class HostsManager(Cmd):
             if not os.path.isdir(data_dir):
                 is_pull = True
         to_use = self._get_source_by_name(name)
-        updator = HostsUpdator(to_use['name'], to_use['url'])
+        updator = HostsUpdator(to_use['name'], to_use['url'], self.app_root)
         if is_pull:
             updator.pull()
         updator.use()
@@ -241,6 +243,19 @@ class HostsManager(Cmd):
 
 
 if __name__ == '__main__':
+    from util import admin
+    if os.name == 'nt':
+        if not admin.is_admin_nt():
+            print('\n*** Need administrator privileges!\nInstead of Requesting UAC elevation from within the script?, we recommand runing as admin from the very begining.\n')
+            admin.run_as_admin()
+            exit(0)
+    elif os.name == 'posix':
+        if not admin.is_admin_posix():
+            print('\n*** Need root privileges!\nUse `sudo python hman.py` to run the script as root.\n')
+            exit(0)
+    else:
+        raise RuntimeError('Unsupported operating system: %s' %(os.name,))
+
     hman = HostsManager()
     try:
         hman.cmdloop()

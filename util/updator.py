@@ -53,10 +53,11 @@ logger.addHandler(hd)
 
 class HostsUpdator(object):
     """Class to download and update hosts file.\n"""
-    def __init__(self, source_name, source_url):
+    def __init__(self, source_name, source_url, app_root):
         self.name = source_name
         self.url = source_url
         self.system = platform.system()
+        self.app_root = app_root
         self.hosts_dir = self._get_hosts_dir()
         self.working_dir = self._get_working_dir()
 
@@ -72,8 +73,7 @@ class HostsUpdator(object):
 
     # 获取当前源的数据目录
     def _get_working_dir(self):
-        app_root = os.path.dirname(os.path.abspath(sys.modules[self.__module__].__file__))
-        working_dir = os.path.join(app_root, 'data', self.name)
+        working_dir = os.path.join(self.app_root, 'data', self.name)
         if not os.path.isdir(working_dir):
             os.makedirs(working_dir)
         return working_dir
