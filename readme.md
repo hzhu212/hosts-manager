@@ -175,9 +175,15 @@ C:\Users\Haley
 λ
 ```
 
-开启科学上网之旅吧~
+### TODO
 
-<!-- ## English document
+- [X] 命令行自动补全
+- [X] 更友好的方式获取管理员权限
+- [ ] 图形界面
+
+---
+
+## English document
 
 ### Usage
 
@@ -186,42 +192,173 @@ C:\Users\Haley
 #### Required environment
 
 1. Python(both 2.x and 3.x are fine)
-2. On Windows platform, need third party library `pypiwin32`, use command `pip install pypiwin32` for installing.
+2. `pypiwin32`(only for Windows), use command `pip install pypiwin32` to install.
+3. `readline`(for Linux/MaxOSX) or `pyreadline` for Windows. Not nessesary, only for command line autocomplete.
+
+> note:
+> 1. All the required packages are stored in `requirements.txt`. Type `pip install -r requirements.txt` to install them one-time.
+> 2. We recommand using `virtualenv` to manage the environment.
 
 #### How to use
 
-1. Download this project to your PC. Use `git clone` or `download zip`.
-2. In order to open hman everywhere, Add the project folder `hosts-manager` to environment variable `PATH`.
-3. Open cmd and input `hman run`, your hosts file will get updated.
-4. Input `hman help` or just `hman` to view other features.
+1. Download this project to your PC. Use `git clone` or just download zip.
+2. In order to open hman anywhere, add the project folder `hosts-manager` to the environment variable `PATH`.
+3. Run cmd as admin(use "sudo" prefix on Linux or MacOSX), then type `hman.py` to open hosts-manager.
+4. There are more than 10 built-in active hosts sources, you can add, delete and modify them conveniently. 
+5. All the commands and their meaning are listed bellow:
+    - `ls` or `list`: list all the hosts sources
+    - `add`: add a hosts source
+    - `rename`: rename some hosts source
+    - `reorder`: change the position of some hosts source
+    - `pull`: pull/download hosts from remote and store it into directory `data/`
+    - `use`: switch to specified hosts(ie: replace system hosts with downloaded one)
+    - `use`+`-p`: equivalent to `pull` and `use`
+    - `h`: get general help message
+    - `help`: get help for specified command
 
 ### Example
 
-![mark](http://os09d5k4j.bkt.clouddn.com/image/170905/ajG0bEBLG1.png?imageslim)
+Open hosts-manager:
 
-Download and update hosts after entering `hman run`:
+```bash
+C:\Users\Haley
+λ hman.py
+Welcome to hosts-manager CLI. Type "h" to get general help. Type "help <command>" to get command help.
 
-![mark](http://os09d5k4j.bkt.clouddn.com/image/170904/H52l5FJb7b.png?imageslim)
+(hman)> h
 
-google.com: 
+Usage:
+  hman <command> [<parameters>]
 
-![mark](http://os09d5k4j.bkt.clouddn.com/image/170905/4G5m5cG0CD.png?imageslim)
+Commands:
+  h:            Show this help message.
+  add:          Add a new source.
+  help:         Show help message for a specified command.
+  list:         List all the sources available. Source in use starts with "*".
+  ls:           Alias of `list`.
+  pull:         Pull and store hosts from remote.
+  rename:       Rename a source.
+  ren:          Alias of `rename`.
+  remove:       Remove existing source(s).
+  rm:           Alias of `remove`.
+  reorder:      Reorder a source.
+  use:          Use specified source as system hosts.
+```
 
-youtube.com:
+Get help for specified command:
 
-![mark](http://os09d5k4j.bkt.clouddn.com/image/170905/l90b5kkcFD.png?imageslim)
+```bash
+(hman)> help ls
+List all the hosts sources. Symbol "*" indicates the one in use.
+        Usage: `list` or `ls`.
+        Use extra parameter `-a` or `--all` to list detail information.
+```
 
-Manage your hosts sources(switch, add, delete and rename)
+List all the hosts sources("*" indicates the one in use):
 
-![mark](http://os09d5k4j.bkt.clouddn.com/image/170905/idLbAc1Kce.png?imageslim)
+```bash
+(hman)> ls
+* gg:   https://raw.githubusercontent.com/googlehosts/hosts/master/hosts-files/hosts
+  sy618-pc:     https://raw.githubusercontent.com/sy618/hosts/master/pc
+  sy618-fq:     https://raw.githubusercontent.com/sy618/hosts/master/FQ
+  wcm:  https://raw.githubusercontent.com/wangchunming/2017hosts/master/hosts-pc
+  wcm-ipv6:     https://raw.githubusercontent.com/wangchunming/2017hosts/master/hosts-ipv6-pc
+  lengers:      http://git.oschina.net/lengers/connector/raw/master/hosts
+  ll-ipv6:      https://raw.githubusercontent.com/lennylxx/ipv6-hosts/master/hosts
+  sly:  https://raw.githubusercontent.com/superliaoyong/hosts/master/hosts
+  vokins-ad:    https://raw.githubusercontent.com/vokins/yhosts/master/hosts
+  racaljk:      https://raw.githubusercontent.com/racaljk/hosts/master/hosts
+```
 
-hman makes it easy to cross the wall!
- -->
+Pull and switch to some hosts source:
+
+```bash
+(hman)> use w <Tab>
+wcm      wcm-ipv6
+(hman)> use wcm -p
+[2017-09-12 10:58:12]:INFO: Downloading hosts from source [wcm]: https://raw.githubusercontent.com/wangchunming/2017hosts/master/hosts-pc ...
+[2017-09-12 10:58:17]:INFO: Success pulling hosts from source [wcm]
+[2017-09-12 10:58:17]:INFO: Success backing up hosts
+
+Windows IP 配置
+
+已成功刷新 DNS 解析缓存。
+[2017-09-12 10:58:17]:INFO: Success switching hosts to source [wcm]
+(hman)> ls
+  gg:   https://raw.githubusercontent.com/googlehosts/hosts/master/hosts-files/hosts
+  sy618-pc:     https://raw.githubusercontent.com/sy618/hosts/master/pc
+  sy618-fq:     https://raw.githubusercontent.com/sy618/hosts/master/FQ
+* wcm:  https://raw.githubusercontent.com/wangchunming/2017hosts/master/hosts-pc
+  wcm-ipv6:     https://raw.githubusercontent.com/wangchunming/2017hosts/master/hosts-ipv6-pc
+  lengers:      http://git.oschina.net/lengers/connector/raw/master/hosts
+  ll-ipv6:      https://raw.githubusercontent.com/lennylxx/ipv6-hosts/master/hosts
+  sly:  https://raw.githubusercontent.com/superliaoyong/hosts/master/hosts
+  vokins-ad:    https://raw.githubusercontent.com/vokins/yhosts/master/hosts
+  racaljk:      https://raw.githubusercontent.com/racaljk/hosts/master/hosts
+```
+
+Add a new hosts source(need source name, url, and remark), and then change its position properly.
+
+> Adding an existing source will be treated as modifing. 
+
+```bash
+(hman)> add gg-m https://coding.net/u/scaffrey/p/hosts/git/raw/master/hosts-files/hosts "mirror of googlehosts"
+Added new source: gg-m - https://coding.net/u/scaffrey/p/hosts/git/raw/master/hosts-files/hosts
+
+(hman)> ls
+  gg:   https://raw.githubusercontent.com/googlehosts/hosts/master/hosts-files/hosts
+  sy618-pc:     https://raw.githubusercontent.com/sy618/hosts/master/pc
+  sy618-fq:     https://raw.githubusercontent.com/sy618/hosts/master/FQ
+* wcm:  https://raw.githubusercontent.com/wangchunming/2017hosts/master/hosts-pc
+  wcm-ipv6:     https://raw.githubusercontent.com/wangchunming/2017hosts/master/hosts-ipv6-pc
+  lengers:      http://git.oschina.net/lengers/connector/raw/master/hosts
+  ll-ipv6:      https://raw.githubusercontent.com/lennylxx/ipv6-hosts/master/hosts
+  sly:  https://raw.githubusercontent.com/superliaoyong/hosts/master/hosts
+  vokins-ad:    https://raw.githubusercontent.com/vokins/yhosts/master/hosts
+  racaljk:      https://raw.githubusercontent.com/racaljk/hosts/master/hosts
+  gg-m: https://coding.net/u/scaffrey/p/hosts/git/raw/master/hosts-files/hosts
+
+(hman)> reorder gg-m 2
+(hman)> ls
+  gg:   https://raw.githubusercontent.com/googlehosts/hosts/master/hosts-files/hosts
+  gg-m: https://coding.net/u/scaffrey/p/hosts/git/raw/master/hosts-files/hosts
+  sy618-pc:     https://raw.githubusercontent.com/sy618/hosts/master/pc
+  sy618-fq:     https://raw.githubusercontent.com/sy618/hosts/master/FQ
+* wcm:  https://raw.githubusercontent.com/wangchunming/2017hosts/master/hosts-pc
+  wcm-ipv6:     https://raw.githubusercontent.com/wangchunming/2017hosts/master/hosts-ipv6-pc
+  lengers:      http://git.oschina.net/lengers/connector/raw/master/hosts
+  ll-ipv6:      https://raw.githubusercontent.com/lennylxx/ipv6-hosts/master/hosts
+  sly:  https://raw.githubusercontent.com/superliaoyong/hosts/master/hosts
+  vokins-ad:    https://raw.githubusercontent.com/vokins/yhosts/master/hosts
+  racaljk:      https://raw.githubusercontent.com/racaljk/hosts/master/hosts
+```
+
+Pull some hosts source(do not switch):
+
+```bash
+(hman)> pull gg-m
+[2017-09-12 11:06:08]:INFO: Downloading hosts from source [gg-m]: https://coding.net/u/scaffrey/p/hosts/git/raw/master/hosts-files/hosts ...
+[2017-09-12 11:06:10]:INFO: Success pulling hosts from source [gg-m]
+```
+
+Switch to some hosts source(do not pull)
+
+```bash
+(hman)> use gg-m
+[2017-09-12 11:06:13]:INFO: Success backing up hosts
+
+Windows IP 配置
+
+已成功刷新 DNS 解析缓存。
+[2017-09-12 11:06:14]:INFO: Success switching hosts to source [gg-m]
+(hman)> exit
+
+C:\Users\Haley
+λ
+```
 
 ### TODO
 
-- [X] 命令行自动补全；
-- [X] 更友好的方式请求管理员权限；
-- [X] 使用装饰器重构 HostsManager 类中的参数判断
-- [X] 解决 Python2 中存在的编解码问题
-- [ ] 图形界面
+- [X] command line autocomplete
+- [X] get administrator privileges more friendly
+- [ ] GUI
