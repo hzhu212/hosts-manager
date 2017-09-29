@@ -122,7 +122,13 @@ class HostsUpdator(object):
                 f.write(md5)
 
         logger.info('Downloading hosts from source [%s]: %s ...' %(self.name, self.url))
-        data = urlopen(self.url).read()
+        try:
+            data = urlopen(self.url, timeout=10).read()
+        except Exception as e:
+            logger.debug(e)
+            logger.info('Can not pull hosts from source [%s], probably there is a network error.\n \
+                You can download the hosts by hand and then copy it into `hosts.txt` below `data` dir.' %self.name)
+            return
         md5 = hashlib.md5(data).hexdigest()
         md5_file = os.path.join(self.working_dir, 'md5.txt')
         last_md5 = get_last_md5(md5_file)
