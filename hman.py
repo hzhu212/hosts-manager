@@ -11,7 +11,7 @@ from util.updator import HostsUpdator
 
 help_message = '''
 Usage:
-  hman <command> [<parameters>]
+  <command> [<parameters>]
 
 Commands:
   h:      \tShow this help message.
